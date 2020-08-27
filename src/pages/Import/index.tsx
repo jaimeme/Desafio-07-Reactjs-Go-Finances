@@ -23,20 +23,34 @@ const Import: React.FC = () => {
   const history = useHistory();
 
   async function handleUpload(): Promise<void> {
-    // const data = new FormData();
+    const data = new FormData();
 
+    if (!uploadedFiles.length) return
+    // Verificação se há algum arquivo, se não tiver ele sai do handledUpload
+    const file = uploadedFiles[0];
     // TODO
-
+    data.append('file', file.file, file.name)
+    // Foi usado o uploadedFiles[0] pq o backend só aceita um arquivo por vês futuramente alterar para poder receber vários arquivos
     try {
-      // await api.post('/transactions/import', data);
+      await api.post('/transactions/import', data);
+
+      history.push('/');
     } catch (err) {
-      // console.log(err.response.error);
+      console.log(err.response.error);
     }
   }
 
   function submitFile(files: File[]): void {
     // TODO
+    const uploadFiles = files.map(file => ({
+      file,
+      name: file.name,
+      readableSize: filesize(file.size),
+    }))
+
+    setUploadedFiles(uploadFiles)
   }
+
 
   return (
     <>
@@ -44,6 +58,7 @@ const Import: React.FC = () => {
       <Container>
         <Title>Importar uma transação</Title>
         <ImportFileContainer>
+          {/* Parte branca que tem o drop de arquivo csv */}
           <Upload onUpload={submitFile} />
           {!!uploadedFiles.length && <FileList files={uploadedFiles} />}
 
